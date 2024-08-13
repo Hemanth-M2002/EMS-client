@@ -5,7 +5,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 export default function EditEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [inputs, setInputs] = useState({});
+  const [inputs, setInputs] = useState({
+    name: '',
+    email: '',
+    mobile: '',
+    designation: '',
+    gender: '',
+    courses: ''
+  });
   const [file, setFile] = useState(null);
 
   useEffect(() => {
@@ -25,28 +32,28 @@ export default function EditEmployee() {
   function handleEdit(event) {
     event.preventDefault();
     const formData = new FormData();
-    formData.append('name', inputs.name || '');
-    formData.append('email', inputs.email || '');
-    formData.append('mobile', inputs.mobile || '');
-    formData.append('designation', inputs.designation || '');
-    formData.append('gender', inputs.gender || '');
-    formData.append('courses', inputs.courses || '');
+    formData.append('name', inputs.name);
+    formData.append('email', inputs.email);
+    formData.append('mobile', inputs.mobile);
+    formData.append('designation', inputs.designation);
+    formData.append('gender', inputs.gender);
+    formData.append('courses', inputs.courses);
     if (file) {
       formData.append('image', file);
     }
 
     axios
-      .put(`http://localhost:4000/view/${id}`, formData, {
+      .put(`http://localhost:4000/edit/${id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       })
-      .then(response => {
+      .then((response) => {
         alert("Employee data edited successfully");
-        navigate('/');
+        navigate('/view');
       })
-      .catch(error => {
-        console.error(error);
+      .catch((error) => {
+        console.error("Error updating employee data:", error);
       });
   }
 
@@ -63,7 +70,7 @@ export default function EditEmployee() {
                 placeholder='Name' 
                 id='name' 
                 name='name' 
-                value={inputs.name || ''} 
+                value={inputs.name} 
                 onChange={(event) => setInputs({ ...inputs, name: event.target.value })}
               />
             </div>
@@ -72,8 +79,8 @@ export default function EditEmployee() {
                 className='border p-2 mb-4 w-80 ml-2' 
                 type="email" 
                 placeholder='Email' 
-                value={inputs.email || ''} 
-                onChange={(event) => setInputs({...inputs, email: event.target.value})}
+                value={inputs.email} 
+                onChange={(event) => setInputs({ ...inputs, email: event.target.value })}
               />
             </div>
             <div>
@@ -81,8 +88,8 @@ export default function EditEmployee() {
                 className='border p-2 mb-4 w-80 ml-2' 
                 type="text" 
                 placeholder='Mobile Number' 
-                value={inputs.mobile || ''} 
-                onChange={(event) => setInputs({...inputs, mobile: event.target.value})}
+                value={inputs.mobile} 
+                onChange={(event) => setInputs({ ...inputs, mobile: event.target.value })}
               />
             </div>
             <div>
@@ -90,14 +97,14 @@ export default function EditEmployee() {
                 className='border p-2 mb-4 w-80 ml-2' 
                 type="text" 
                 placeholder='Designation' 
-                value={inputs.designation || ''} 
+                value={inputs.designation} 
                 onChange={(event) => setInputs({ ...inputs, designation: event.target.value })}
               />
             </div>
             <div>
               <select 
                 className='border p-2 mb-4 w-80 ml-2'
-                value={inputs.gender || ''}
+                value={inputs.gender}
                 onChange={(event) => setInputs({ ...inputs, gender: event.target.value })}
               >
                 <option value="">Select Gender</option>
@@ -111,8 +118,8 @@ export default function EditEmployee() {
                 className='border p-2 mb-4 w-80 ml-2' 
                 type="text" 
                 placeholder='Courses' 
-                value={inputs.courses || ''} 
-                onChange={(event) => setInputs({...inputs, courses: event.target.value})}
+                value={inputs.courses} 
+                onChange={(event) => setInputs({ ...inputs, courses: event.target.value })}
               />
             </div>
             <div>
@@ -122,7 +129,9 @@ export default function EditEmployee() {
                 onChange={handleFileChange}
               />
             </div>
-            <button className='w-full py-2 my-4 bg-green-600 hover:bg-yellow-500 mt-7'>Update Employee</button>
+            <button className='w-full py-2 my-4 bg-green-600 hover:bg-yellow-500 mt-7'>
+              Update Employee
+            </button>
           </form>
         </div>
       </div>

@@ -12,6 +12,7 @@ export default function ViewEmployee() {
   const fetchData = () => {
     axios.get("http://localhost:4000/view")
       .then((resp) => {
+        console.log("Fetched Data:", resp.data.data); // Log the data
         setDataList(resp.data.data);
       })
       .catch((error) => {
@@ -36,11 +37,11 @@ export default function ViewEmployee() {
 
   // Handle search filter
   const filteredData = dataList.filter(employee =>
-    (employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     employee.mobile.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (employee.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     employee.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     employee.mobile?.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (selectedDesignation === '' || employee.designation === selectedDesignation) &&
-    (selectedCourses.length === 0 || selectedCourses.some(course => employee.courses.includes(course)))
+    (selectedCourses.length === 0 || selectedCourses.some(course => employee.courses?.includes(course)))
   );
 
   return (
@@ -120,6 +121,7 @@ export default function ViewEmployee() {
             <thead className="bg-gray-200 text-gray-700">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-sm font-medium">S.No</th>
+                <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Photo</th>
                 <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Name</th>
                 <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Email</th>
                 <th scope="col" className="px-6 py-3 text-left text-sm font-medium">Mobile</th>
@@ -133,11 +135,16 @@ export default function ViewEmployee() {
               {filteredData.map((employee, index) => (
                 <tr key={employee._id}>
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{index + 1}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{employee.name}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{employee.email}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{employee.mobile}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{employee.designation}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{employee.gender}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {employee.image ? (
+                      <img src={employee.image} alt="" className="w-16 h-16 object-cover rounded-full" />
+                    ) : 'No Photo'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{employee.name || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{employee.email || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{employee.mobile || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{employee.designation || 'N/A'}</td>
+                  <td className="px-6 py-4 text-sm text-gray-700">{employee.gender || 'N/A'}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{Array.isArray(employee.courses) ? employee.courses.join(', ') : 'No Courses'}</td>
                   <td className="px-6 py-4 text-sm font-medium flex space-x-2">
                     <Link to={`/edit/${employee._id}`}>

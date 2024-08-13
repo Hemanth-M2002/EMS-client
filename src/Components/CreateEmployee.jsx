@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+// import { Cloudinary } from 'cloudinary-core';
+
+// const cloudinary = new Cloudinary({ cloud_name: 'dmopj2k6n', secure: true }); // Replace with your Cloudinary cloud name
 
 const CreateEmployee = () => {
   const [employees, setEmployees] = useState([]);
@@ -11,16 +14,17 @@ const CreateEmployee = () => {
     designation: '',
     gender: '',
     courses: [],
-    image: null
+    image: ''
   });
   const [loading, setLoading] = useState(true);
+  const [imageFile, setImageFile] = useState(null); // State for image file
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchEmployees = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/ems');
-        setEmployees(response.data);
+        const response = await axios.get('http://localhost:4000/view');
+        setEmployees(response.data.data);
       } catch (error) {
         console.error('Error fetching employee data:', error);
       } finally {
@@ -43,31 +47,59 @@ const CreateEmployee = () => {
   };
 
   const handleFileChange = (e) => {
-    setForm((prev) => ({ ...prev, image: e.target.files[0] }));
+    setImageFile(e.target.files[0]); // Set the file object
   };
 
+  const uploadImageToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'ems_portal'); // Replace with your upload preset
+  
+    try {
+      const response = await axios.post('https://api.cloudinary.com/v1_1/dmopj2k6n/image/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      if (response.data && response.data.secure_url) {
+        return response.data.secure_url; // Return the image URL
+      } else {
+        throw new Error('Image upload failed: No URL returned');
+      }
+    } catch (error) {
+      console.error('Error uploading image to Cloudinary:', error.response ? error.response.data : error.message);
+      return null;
+    }
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    for (const key in form) {
-      formData.append(key, form[key]);
-    }
+    setLoading(true);
     try {
-      await axios.post('http://localhost:4000/create', formData, {
+      let imageUrl = '';
+
+      if (imageFile) {
+        imageUrl = await uploadImageToCloudinary(imageFile); // Upload image and get URL
+      }
+
+      const employeeData = {
+        ...form,
+        image: imageUrl // Use the Cloudinary URL
+      };
+
+      await axios.post('http://localhost:4000/create', employeeData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'application/json'
         }
       });
       alert('Employee added successfully!');
       navigate('/view');
     } catch (error) {
       console.error('Error adding employee:', error);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleCheckboxChange = (e) => {
-    const { value } = e.target;
-    setForm((prev) => ({ ...prev, courses: [value] }));
   };
 
   return (
@@ -178,7 +210,7 @@ const CreateEmployee = () => {
                   name="courses"
                   value="MCA"
                   checked={form.courses.includes('MCA')}
-                  onChange={handleCheckboxChange}
+                  onChange={handleInputChange}
                   className="mr-2"
                 />
                 MCA
@@ -189,7 +221,7 @@ const CreateEmployee = () => {
                   name="courses"
                   value="BCA"
                   checked={form.courses.includes('BCA')}
-                  onChange={handleCheckboxChange}
+                  onChange={handleInputChange}
                   className="mr-2"
                 />
                 BCA
@@ -200,7 +232,7 @@ const CreateEmployee = () => {
                   name="courses"
                   value="BSC"
                   checked={form.courses.includes('BSC')}
-                  onChange={handleCheckboxChange}
+                  onChange={handleInputChange}
                   className="mr-2"
                 />
                 BSC
