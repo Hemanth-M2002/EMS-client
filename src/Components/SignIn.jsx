@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { ClipLoader } from 'react-spinners';
@@ -8,9 +8,16 @@ const SignIn = () => {
   const auth = getAuth();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if(localStorage.getItem("ems")){
+      navigate("/view");
+    }
+  }, []);
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -21,7 +28,10 @@ const SignIn = () => {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigate('/admin');
+      if(!localStorage.getItem("name")){
+        localStorage.setItem("name", name);
+      }
+      navigate('/view');
     } catch (error) {
       console.error('Login failed:', error.message);
       setError("Invalid email or password. Please try again.");
@@ -41,7 +51,17 @@ const SignIn = () => {
           <h2 className="font-bold text-2xl text-[#002D74]">Login</h2>
           <p className="text-xs mt-4 text-[#002D74]">If you are already a member, easily log in</p>
 
+
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={`p-2 mt-8 rounded-xl border`}
+              type="name"
+              name="name"
+              placeholder="Enter your name"
+            />
+
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}

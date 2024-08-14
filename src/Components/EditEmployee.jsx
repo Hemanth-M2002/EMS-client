@@ -11,7 +11,7 @@ export default function EditEmployee() {
     mobile: '',
     designation: '',
     gender: '',
-    courses: ''
+    courses: []
   });
   const [file, setFile] = useState(null);
 
@@ -29,24 +29,51 @@ export default function EditEmployee() {
     setFile(event.target.files[0]);
   }
 
+  function handleInputChange(e) {
+    const { name, value, type, checked } = e.target;
+    if (type === 'checkbox') {
+      setInputs((prev) => ({
+        ...prev,
+        courses: checked ? [...prev.courses, value] : prev.courses.filter((course) => course !== value)
+      }));
+    } else {
+      setInputs((prev) => ({ ...prev, [name]: value }));
+    }
+  }
+
   function handleEdit(event) {
     event.preventDefault();
-    const formData = new FormData();
-    formData.append('name', inputs.name);
-    formData.append('email', inputs.email);
-    formData.append('mobile', inputs.mobile);
-    formData.append('designation', inputs.designation);
-    formData.append('gender', inputs.gender);
-    formData.append('courses', inputs.courses);
-    if (file) {
-      formData.append('image', file);
-    }
 
-    axios
-      .put(`http://localhost:4000/edit/${id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+    const uploadImageToCloudinary = () => {
+      return new Promise((resolve, reject) => {
+        if (!file) {
+          resolve(null);
+        } else {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('upload_preset', 'ems_portal');
+          formData.append('cloud_name', 'dmopj2k6n');
+
+          axios
+            .post('https://api.cloudinary.com/v1_1/dmopj2k6n/image/upload', formData)
+            .then((response) => {
+              resolve(response.data.url);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        }
+      });
+    };
+
+    uploadImageToCloudinary()
+      .then((imageUrl) => {
+        const updatedData = {
+          ...inputs,
+          image: imageUrl || inputs.image,
+        };
+
+        return axios.put(`http://localhost:4000/edit/${id}`, updatedData);
       })
       .then((response) => {
         alert("Employee data edited successfully");
@@ -58,83 +85,143 @@ export default function EditEmployee() {
   }
 
   return (
-    <div className='w-full h-screen flex'>
-      <div className='grid grid-cols-1 md:grid-cols-2 m-auto h-[550px] shadow-lg shadow-green-300 sm:max-w-[900px]'>
-        <div className='p-4 flex flex-col justify-around'>
-          <form onSubmit={handleEdit}>
-            <h2 className='text-4xl font-bold text-center mb-9 text-gray-600'>Edit Employee</h2>
-            <div>
-              <input 
-                className='border p-2 mr-2 mb-4 w-80 ml-2' 
-                type="text" 
-                placeholder='Name' 
-                id='name' 
-                name='name' 
-                value={inputs.name} 
-                onChange={(event) => setInputs({ ...inputs, name: event.target.value })}
-              />
+    <div className="max-w-4xl mx-auto p-6 bg-gray-100">
+      <h1 className="text-3xl font-extrabold text-gray-800 mb-6">Edit Employee</h1>
+      <form onSubmit={handleEdit} className="bg-white shadow-lg rounded-lg p-8">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Update Employee Details</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Name:</label>
+            <input
+              type="text"
+              name="name"
+              value={inputs.name}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Email:</label>
+            <input
+              type="email"
+              name="email"
+              value={inputs.email}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Mobile No:</label>
+            <input
+              type="tel"
+              name="mobile"
+              value={inputs.mobile}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Designation:</label>
+            <select
+              name="designation"
+              value={inputs.designation}
+              onChange={handleInputChange}
+              className="w-full p-3 border border-gray-300 rounded-lg"
+              required
+            >
+              <option value="">Select</option>
+              <option value="HR">HR</option>
+              <option value="Manager">Manager</option>
+              <option value="Sales">Sales</option>
+              {/* Add more options as needed */}
+            </select>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Gender:</label>
+            <div className="flex space-x-4">
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Male"
+                  checked={inputs.gender === 'Male'}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                Male
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="radio"
+                  name="gender"
+                  value="Female"
+                  checked={inputs.gender === 'Female'}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                Female
+              </label>
             </div>
-            <div>
-              <input 
-                className='border p-2 mb-4 w-80 ml-2' 
-                type="email" 
-                placeholder='Email' 
-                value={inputs.email} 
-                onChange={(event) => setInputs({ ...inputs, email: event.target.value })}
-              />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Courses:</label>
+            <div className="space-y-2">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="courses"
+                  value="MCA"
+                  checked={inputs.courses.includes('MCA')}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                MCA
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="courses"
+                  value="BCA"
+                  checked={inputs.courses.includes('BCA')}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                BCA
+              </label>
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="courses"
+                  value="BSC"
+                  checked={inputs.courses.includes('BSC')}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                BSC
+              </label>
+              {/* Add more checkboxes as needed */}
             </div>
-            <div>
-              <input 
-                className='border p-2 mb-4 w-80 ml-2' 
-                type="text" 
-                placeholder='Mobile Number' 
-                value={inputs.mobile} 
-                onChange={(event) => setInputs({ ...inputs, mobile: event.target.value })}
-              />
-            </div>
-            <div>
-              <input 
-                className='border p-2 mb-4 w-80 ml-2' 
-                type="text" 
-                placeholder='Designation' 
-                value={inputs.designation} 
-                onChange={(event) => setInputs({ ...inputs, designation: event.target.value })}
-              />
-            </div>
-            <div>
-              <select 
-                className='border p-2 mb-4 w-80 ml-2'
-                value={inputs.gender}
-                onChange={(event) => setInputs({ ...inputs, gender: event.target.value })}
-              >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div>
-              <input 
-                className='border p-2 mb-4 w-80 ml-2' 
-                type="text" 
-                placeholder='Courses' 
-                value={inputs.courses} 
-                onChange={(event) => setInputs({ ...inputs, courses: event.target.value })}
-              />
-            </div>
-            <div>
-              <input 
-                className='border p-2 mb-4 w-80 ml-2' 
-                type="file" 
-                onChange={handleFileChange}
-              />
-            </div>
-            <button className='w-full py-2 my-4 bg-green-600 hover:bg-yellow-500 mt-7'>
-              Update Employee
-            </button>
-          </form>
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">Upload Image:</label>
+            <input
+              type="file"
+              name="image"
+              onChange={handleFileChange}
+              className="w-full border border-gray-300 rounded-lg p-2"
+            />
+          </div>
         </div>
-      </div>
+        <button
+          type="submit"
+          className="bg-green-600 hover:bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg shadow-md"
+        >
+          Update Employee
+        </button>
+      </form>
     </div>
   );
 }

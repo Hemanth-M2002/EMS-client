@@ -1,9 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-// import { Cloudinary } from 'cloudinary-core';
 
-// const cloudinary = new Cloudinary({ cloud_name: 'dmopj2k6n', secure: true }); // Replace with your Cloudinary cloud name
+// Basic UI components
+const Card = ({ children, className }) => <div className={`bg-white shadow-md rounded-lg ${className}`}>{children}</div>;
+const CardHeader = ({ children }) => <div className="border-b border-gray-300 p-4">{children}</div>;
+const CardTitle = ({ children, className }) => <h2 className={`text-2xl font-semibold text-gray-900 ${className}`}>{children}</h2>;
+const CardDescription = ({ children }) => <p className="text-gray-700">{children}</p>;
+const CardContent = ({ children }) => <div className="p-4">{children}</div>;
+const CardFooter = ({ children, className }) => <div className={`border-t border-gray-300 p-4 ${className}`}>{children}</div>;
+
+const Label = ({ htmlFor, children }) => (
+  <label htmlFor={htmlFor} className="block text-gray-800 font-medium mb-2">
+    {children}
+  </label>
+);
+
+const Input = ({ id, type = 'text', placeholder, ...props }) => (
+  <input
+    id={id}
+    type={type}
+    placeholder={placeholder}
+    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100"
+    {...props}
+  />
+);
+
+const Select = ({ id, children }) => (
+  <select id={id} className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100">
+    {children}
+  </select>
+);
+
+const SelectTrigger = ({ children }) => <div>{children}</div>;
+const SelectValue = ({ placeholder }) => <option value="">{placeholder}</option>;
+const SelectContent = ({ children }) => <>{children}</>;
+const SelectItem = ({ value, children }) => <option value={value}>{children}</option>;
+
+const RadioGroup = ({ children }) => <div>{children}</div>;
+const RadioGroupItem = ({ id, name, value, ...props }) => (
+  <input type="radio" id={id} name={name} value={value} {...props} />
+);
+
+const Checkbox = ({ id, ...props }) => (
+  <input type="checkbox" id={id} {...props} />
+);
+
+const Button = ({ type = 'button', children, className, ...props }) => (
+  <button type={type} className={`bg-black text-white px-6 py-2 rounded-lg shadow-md hover:bg-gray-800 ${className}`} {...props}>
+    {children}
+  </button>
+);
 
 const CreateEmployee = () => {
   const [employees, setEmployees] = useState([]);
@@ -17,7 +64,7 @@ const CreateEmployee = () => {
     image: ''
   });
   const [loading, setLoading] = useState(true);
-  const [imageFile, setImageFile] = useState(null); // State for image file
+  const [imageFile, setImageFile] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,7 +94,7 @@ const CreateEmployee = () => {
   };
 
   const handleFileChange = (e) => {
-    setImageFile(e.target.files[0]); // Set the file object
+    setImageFile(e.target.files[0]);
   };
 
   const uploadImageToCloudinary = async (file) => {
@@ -63,7 +110,7 @@ const CreateEmployee = () => {
       });
   
       if (response.data && response.data.secure_url) {
-        return response.data.secure_url; // Return the image URL
+        return response.data.secure_url;
       } else {
         throw new Error('Image upload failed: No URL returned');
       }
@@ -72,7 +119,7 @@ const CreateEmployee = () => {
       return null;
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -80,12 +127,12 @@ const CreateEmployee = () => {
       let imageUrl = '';
 
       if (imageFile) {
-        imageUrl = await uploadImageToCloudinary(imageFile); // Upload image and get URL
+        imageUrl = await uploadImageToCloudinary(imageFile);
       }
 
       const employeeData = {
         ...form,
-        image: imageUrl // Use the Cloudinary URL
+        image: imageUrl
       };
 
       await axios.post('http://localhost:4000/create', employeeData, {
@@ -103,161 +150,90 @@ const CreateEmployee = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-100">
-      <h1 className="text-3xl font-extrabold text-gray-800 mb-6">Employee List</h1>
-      <div className="mb-8">
-        {loading ? (
-          <p className="text-gray-600">Loading...</p>
-        ) : (
-          <ul className="space-y-4">
-            {employees.map((emp) => (
-              <li key={emp._id} className="p-4 bg-white shadow-md rounded-lg flex justify-between items-center">
-                <div className="text-gray-700">
-                  <h2 className="text-xl font-semibold">{emp.name}</h2>
-                  <p>{emp.email}</p>
-                </div>
-                <button className="bg-blue-500 text-white py-1 px-3 rounded-lg shadow-md hover:bg-blue-600">View</button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Add New Employee</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Mobile No:</label>
-            <input
-              type="tel"
-              name="mobile"
-              value={form.mobile}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Designation:</label>
-            <select
-              name="designation"
-              value={form.designation}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            >
-              <option value="">Select</option>
-              <option value="HR">HR</option>
-              <option value="Manager">Manager</option>
-              <option value="Sales">Sales</option>
-              {/* Add more options as needed */}
-            </select>
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Gender:</label>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Male"
-                  checked={form.gender === 'Male'}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                Male
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Female"
-                  checked={form.gender === 'Female'}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                Female
-              </label>
+    <Card className="w-full max-w-2xl mx-auto p-6 sm:p-8 md:p-10">
+      <CardHeader>
+        <CardTitle className="text-3xl font-bold">Employee Management</CardTitle>
+        <CardDescription>Fill out the form to add a new employee.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" name="name" value={form.name} onChange={handleInputChange} placeholder="John Doe" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" value={form.email} onChange={handleInputChange} placeholder="john@example.com" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="mobile">Mobile No.</Label>
+              <Input id="mobile" name="mobile" type="tel" value={form.mobile} onChange={handleInputChange} placeholder="123-456-7890" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="designation">Designation</Label>
+              <Select id="designation" name="designation" value={form.designation} onChange={handleInputChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select designation" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manager">Manager</SelectItem>
+                  <SelectItem value="developer">Developer</SelectItem>
+                  <SelectItem value="designer">Designer</SelectItem>
+                  <SelectItem value="analyst">Analyst</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Courses:</label>
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="courses"
-                  value="MCA"
-                  checked={form.courses.includes('MCA')}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                MCA
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="courses"
-                  value="BCA"
-                  checked={form.courses.includes('BCA')}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                BCA
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="courses"
-                  value="BSC"
-                  checked={form.courses.includes('BSC')}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                BSC
-              </label>
-              {/* Add more checkboxes as needed */}
+          <div className="space-y-4 flex flex-col justify-between ml-8">
+            <div className="grid gap-2">
+              <Label>Gender</Label>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="male" className="flex items-center gap-2 cursor-pointer">
+                  <RadioGroup>
+                    <RadioGroupItem name="gender" id="male" value="male" checked={form.gender === 'male'} onChange={handleInputChange} className="peer sr-only" />
+                    <div className="w-5 h-5 rounded-full border border-gray-300 transition-colors peer-checked:bg-gray-800 peer-checked:border-gray-800" />
+                    <span className="text-sm text-gray-800">Male</span>
+                  </RadioGroup>
+                </Label>
+                <Label htmlFor="female" className="flex items-center gap-2 cursor-pointer">
+                  <RadioGroup>
+                    <RadioGroupItem name="gender" id="female" value="female" checked={form.gender === 'female'} onChange={handleInputChange} className="peer sr-only" />
+                    <div className="w-5 h-5 rounded-full border border-gray-300 transition-colors peer-checked:bg-gray-800 peer-checked:border-gray-800" />
+                    <span className="text-sm text-gray-800">Female</span>
+                  </RadioGroup>
+                </Label>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label>Courses</Label>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="mca" className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox id="mca" value="MCA" checked={form.courses.includes('MCA')} onChange={handleInputChange} />
+                  <span className="text-sm text-gray-800" > MCA</span>
+                </Label>
+                <Label htmlFor="bca" className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox id="bca" value="BCA" checked={form.courses.includes('BCA')} onChange={handleInputChange} />
+                  <span className="text-sm text-gray-800"> BCA</span>
+                </Label>
+                <Label htmlFor="mba" className="flex items-center gap-2 cursor-pointer">
+                  <Checkbox id="mba" value="MBA" checked={form.courses.includes('MBA')} onChange={handleInputChange} />
+                  <span className="text-sm text-gray-800"> MBA</span>
+                </Label>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="image">Profile Image</Label>
+              <Input id="image" type="file" accept="image/*" onChange={handleFileChange} />
             </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Upload Image:</label>
-            <input
-              type="file"
-              name="image"
-              onChange={handleFileChange}
-              className="w-full border border-gray-300 rounded-lg p-2"
-            />
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md"
-        >
-          Submit
-        </button>
-      </form>
-    </div>
+          <Button type="submit" className="self-end">Add Employee</Button>
+        </form>
+      </CardContent>
+      <CardFooter>
+        {loading && <p className="text-gray-500">Loading...</p>}
+      </CardFooter>
+    </Card>
   );
 };
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [name, setName] = useState()
 
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
@@ -29,7 +30,8 @@ export default function Navbar() {
               </Link>
             </div>
           )}
-        </div>
+          </div>
+          {localStorage.getItem("name")?<h2>{localStorage.getItem("name")}</h2>:""}
         <Link to="/sign-in" className="text-black text-lg font-semibold hover:text-gray-200 transition duration-300">
           Logout
         </Link>
