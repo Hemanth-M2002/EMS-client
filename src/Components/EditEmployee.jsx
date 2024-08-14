@@ -2,6 +2,60 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 
+// Basic UI components for form elements
+const Card = ({ children, className }) => <div className={`bg-white shadow-md rounded-lg ${className}`}>{children}</div>;
+const CardHeader = ({ children }) => <div className="border-b border-gray-300 p-4">{children}</div>;
+const CardTitle = ({ children, className }) => <h2 className={`text-2xl font-semibold text-gray-900 ${className}`}>{children}</h2>;
+const CardDescription = ({ children }) => <p className="text-gray-700">{children}</p>;
+const CardContent = ({ children }) => <div className="p-4">{children}</div>;
+const CardFooter = ({ children, className }) => <div className={`border-t border-gray-300 p-4 ${className}`}>{children}</div>;
+
+const Label = ({ htmlFor, children }) => (
+  <label htmlFor={htmlFor} className="block text-gray-800 font-medium mb-2">
+    {children}
+  </label>
+);
+
+const Input = ({ id, type = 'text', placeholder, ...props }) => (
+  <input
+    id={id}
+    type={type}
+    placeholder={placeholder}
+    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100"
+    {...props}
+  />
+);
+
+const Select = ({ id, name, value, onChange, children }) => (
+  <select id={id} name={name} value={value} onChange={onChange} className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100">
+    {children}
+  </select>
+);
+
+const RadioGroup = ({ children }) => <div className="flex items-center gap-4">{children}</div>;
+
+const RadioGroupItem = ({ id, name, value, checked, onChange, label }) => (
+  <label htmlFor={id} className="flex items-center gap-2 cursor-pointer">
+    <input
+      type="radio"
+      id={id}
+      name={name}
+      value={value}
+      checked={checked}
+      onChange={onChange}
+      className="peer sr-only"
+    />
+    <div className="w-5 h-5 rounded-full border border-gray-300 transition-colors peer-checked:bg-gray-800 peer-checked:border-gray-800" />
+    <span className="text-sm text-gray-800">{label}</span>
+  </label>
+);
+
+const Button = ({ type = 'button', children, className, ...props }) => (
+  <button type={type} className={`bg-black text-white px-6 py-2 rounded-lg shadow-md hover:bg-gray-800 ${className}`} {...props}>
+    {children}
+  </button>
+);
+
 export default function EditEmployee() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -11,9 +65,11 @@ export default function EditEmployee() {
     mobile: '',
     designation: '',
     gender: '',
-    courses: []
+    courses: '',
+    image: ''
   });
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     axios.get(`http://localhost:4000/view/${id}`)
@@ -31,11 +87,8 @@ export default function EditEmployee() {
 
   function handleInputChange(e) {
     const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') {
-      setInputs((prev) => ({
-        ...prev,
-        courses: checked ? [...prev.courses, value] : prev.courses.filter((course) => course !== value)
-      }));
+    if (type === 'radio') {
+      setInputs((prev) => ({ ...prev, [name]: value }));
     } else {
       setInputs((prev) => ({ ...prev, [name]: value }));
     }
@@ -43,6 +96,7 @@ export default function EditEmployee() {
 
   function handleEdit(event) {
     event.preventDefault();
+    setLoading(true);
 
     const uploadImageToCloudinary = () => {
       return new Promise((resolve, reject) => {
@@ -75,153 +129,114 @@ export default function EditEmployee() {
 
         return axios.put(`http://localhost:4000/edit/${id}`, updatedData);
       })
-      .then((response) => {
+      .then(() => {
         alert("Employee data edited successfully");
         navigate('/view');
       })
       .catch((error) => {
         console.error("Error updating employee data:", error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-100">
-      <h1 className="text-3xl font-extrabold text-gray-800 mb-6">Edit Employee</h1>
-      <form onSubmit={handleEdit} className="bg-white shadow-lg rounded-lg p-8">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">Update Employee Details</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={inputs.name}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={inputs.email}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Mobile No:</label>
-            <input
-              type="tel"
-              name="mobile"
-              value={inputs.mobile}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Designation:</label>
-            <select
-              name="designation"
-              value={inputs.designation}
-              onChange={handleInputChange}
-              className="w-full p-3 border border-gray-300 rounded-lg"
-              required
-            >
-              <option value="">Select</option>
-              <option value="HR">HR</option>
-              <option value="Manager">Manager</option>
-              <option value="Sales">Sales</option>
-              {/* Add more options as needed */}
-            </select>
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Gender:</label>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Male"
-                  checked={inputs.gender === 'Male'}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                Male
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  name="gender"
-                  value="Female"
-                  checked={inputs.gender === 'Female'}
-                  onChange={handleInputChange}
-                  className="mr-2"
-                />
-                Female
-              </label>
+    <Card className="w-full max-w-2xl mx-auto p-6 sm:p-8 md:p-10">
+      <CardHeader>
+        <CardTitle className="text-3xl font-bold">Edit Employee</CardTitle>
+        <CardDescription>Update the form to edit the employee details.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleEdit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" name="name" value={inputs.name} onChange={handleInputChange} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" value={inputs.email} onChange={handleInputChange} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="mobile">Mobile No.</Label>
+              <Input id="mobile" name="mobile" type="tel" value={inputs.mobile} onChange={handleInputChange} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="designation">Designation</Label>
+              <Select id="designation" name="designation" value={inputs.designation} onChange={handleInputChange}>
+                <option value="">Select designation</option>
+                <option value="HR">HR</option>
+                <option value="Sales">Sales</option>
+                <option value="Manager">Manager</option>
+                <option value="Developer">Developer</option>
+                <option value="Designer">Designer</option>
+              </Select>
             </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Courses:</label>
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
+          <div className="space-y-4">
+            <div className="grid gap-2">
+              {/* <Label>Gender</Label> */}
+              {/* <RadioGroup>
+                <RadioGroupItem
+                  id="male"
+                  name="gender"
+                  value="male"
+                  checked={inputs.gender === 'male'}
+                  onChange={handleInputChange}
+                  label="Male"
+                />
+                <RadioGroupItem
+                  id="female"
+                  name="gender"
+                  value="female"
+                  checked={inputs.gender === 'female'}
+                  onChange={handleInputChange}
+                  label="Female"
+                />
+              </RadioGroup> */}
+            </div>
+            <div className="grid gap-2">
+              <Label>Courses</Label>
+              <RadioGroup>
+                <RadioGroupItem
+                  id="mca"
                   name="courses"
                   value="MCA"
-                  checked={inputs.courses.includes('MCA')}
+                  checked={inputs.courses === 'MCA'}
                   onChange={handleInputChange}
-                  className="mr-2"
+                  label="MCA"
                 />
-                MCA
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
+                <RadioGroupItem
+                  id="bca"
                   name="courses"
                   value="BCA"
-                  checked={inputs.courses.includes('BCA')}
+                  checked={inputs.courses === 'BCA'}
                   onChange={handleInputChange}
-                  className="mr-2"
+                  label="BCA"
                 />
-                BCA
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
+                <RadioGroupItem
+                  id="bsc"
                   name="courses"
                   value="BSC"
-                  checked={inputs.courses.includes('BSC')}
+                  checked={inputs.courses === 'BSC'}
                   onChange={handleInputChange}
-                  className="mr-2"
+                  label="BSC"
                 />
-                BSC
-              </label>
-              {/* Add more checkboxes as needed */}
+              </RadioGroup>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="image">Image Upload</Label>
+              <Input id="image" name="image" type="file" onChange={handleFileChange} />
             </div>
           </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">Upload Image:</label>
-            <input
-              type="file"
-              name="image"
-              onChange={handleFileChange}
-              className="w-full border border-gray-300 rounded-lg p-2"
-            />
-          </div>
-        </div>
-        <button
-          type="submit"
-          className="bg-green-600 hover:bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg shadow-md"
-        >
-          Update Employee
-        </button>
-      </form>
-    </div>
+          <CardFooter className="col-span-2">
+            <Button type="submit" disabled={loading} className="mt-7 ml-[-9px]">
+              {loading ? 'Saving...' : 'Make Changes'}
+            </Button>
+          </CardFooter>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

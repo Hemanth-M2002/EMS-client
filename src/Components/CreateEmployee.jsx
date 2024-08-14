@@ -84,11 +84,13 @@ const CreateEmployee = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
+      // Set the form with the selected course
       setForm((prev) => ({
         ...prev,
-        courses: checked ? [...prev.courses, value] : prev.courses.filter((course) => course !== value)
+        courses: checked ? [value] : [] // Only one course can be selected at a time
       }));
     } else {
+      // Handle other form inputs
       setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
@@ -120,6 +122,22 @@ const CreateEmployee = () => {
     }
   };
 
+  const checkForDuplicates = async (newEmployee) => {
+    try {
+      const response = await axios.get('http://localhost:4000/view');
+      const existingEmployees = response.data.data;
+
+      return existingEmployees.some(emp =>
+        emp.name === newEmployee.name ||
+        emp.email === newEmployee.email ||
+        emp.mobile === newEmployee.mobile
+      );
+    } catch (error) {
+      console.error('Error checking for duplicates:', error);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -134,6 +152,12 @@ const CreateEmployee = () => {
         ...form,
         image: imageUrl
       };
+
+      const isDuplicate = await checkForDuplicates(employeeData);
+      if (isDuplicate) {
+        alert('An employee with the same name, email, or mobile number already exists.');
+        return;
+      }
 
       await axios.post('http://localhost:4000/create', employeeData, {
         headers: {
@@ -160,15 +184,15 @@ const CreateEmployee = () => {
           <div className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" value={form.name} onChange={handleInputChange} placeholder="John Doe" />
+              <Input id="name" name="name" value={form.name} onChange={handleInputChange} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" value={form.email} onChange={handleInputChange} placeholder="john@example.com" />
+              <Input id="email" name="email" type="email" value={form.email} onChange={handleInputChange} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="mobile">Mobile No.</Label>
-              <Input id="mobile" name="mobile" type="tel" value={form.mobile} onChange={handleInputChange} placeholder="123-456-7890" />
+              <Input id="mobile" name="mobile" type="tel" value={form.mobile} onChange={handleInputChange}/>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="designation">Designation</Label>
@@ -177,10 +201,9 @@ const CreateEmployee = () => {
                   <SelectValue placeholder="Select designation" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="developer">Developer</SelectItem>
-                  <SelectItem value="designer">Designer</SelectItem>
-                  <SelectItem value="analyst">Analyst</SelectItem>
+                  <SelectItem value="HR">HR</SelectItem>
+                  <SelectItem value="Sales">Sales</SelectItem>
+                  <SelectItem value="Manager">Manager</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -227,7 +250,7 @@ const CreateEmployee = () => {
               <Input id="image" type="file" accept="image/*" onChange={handleFileChange} />
             </div>
           </div>
-          <Button type="submit" className="self-end">Add Employee</Button>
+          <Button type="submit" className="self-end mt-7">Add Employee</Button>
         </form>
       </CardContent>
       <CardFooter>

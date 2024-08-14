@@ -1,20 +1,20 @@
-import React from 'react'
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 const LandPage = () => {
   return (
-    <div className="h-screen flex justify-center items-center bg-gray-100">
-      <div className="max-w-md p-4 bg-white rounded shadow-md">
-        <h1 className="text-3xl font-bold mb-4">EMS Landing Page</h1>
-        <p className="text-lg mb-8">Welcome to our EMS system.</p>
+    <div className="h-screen flex justify-center items-center bg-gray-200">
+      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-lg">
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-6">Employee Management System</h1>
+        <p className="text-base text-gray-600 mb-6">Streamline your employee management with our intuitive system.</p>
         <Link to="/sign-up">
-          <button className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded">
+          <button className="bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
             Get Started
           </button>
         </Link>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LandPage
+export default LandPage;

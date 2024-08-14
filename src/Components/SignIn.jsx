@@ -31,7 +31,7 @@ const SignIn = () => {
       if(!localStorage.getItem("name")){
         localStorage.setItem("name", name);
       }
-      navigate('/view');
+      navigate('/admin');
     } catch (error) {
       console.error('Login failed:', error.message);
       setError("Invalid email or password. Please try again.");
@@ -61,7 +61,6 @@ const SignIn = () => {
               name="name"
               placeholder="Enter your name"
             />
-
             <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -107,12 +106,6 @@ const SignIn = () => {
             <hr className="border-gray-400" />
           </div>
 
-          <button className="bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 text-[#002D74]">
-            <svg className="mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="25px">
-              {/* Google login SVG */}
-            </svg>
-            Login with Google
-          </button>
 
           <div className="mt-5 text-xs border-b border-[#002D74] py-4 text-[#002D74]">
             <a href="#">Forgot your password?</a>
@@ -127,7 +120,7 @@ const SignIn = () => {
         <div className="md:block hidden w-1/2">
           <img
             className="rounded-2xl"
-            src="https://img.freepik.com/free-photo/collage-about-movie-time-with-kid-wearing-glasses_23-2149946318.jpg?t=st=1717136355~exp=1717139955~hmac=dbcdfe6d33e37c526ad16a5cfb3620af1b7de567b490133b7db1fc50e20b3f79&w=740"
+            src="https://img.freepik.com/premium-photo/hr-consultancy-abstract-concept-vector-illustration-man-deals-with-career-counselling-using-laptop-expat-hiring-hr-management-human-resources-headhunting-agency-abstract-metaphor_1036975-238398.jpg?w=740"
             alt="Login Visual"
           />
         </div>

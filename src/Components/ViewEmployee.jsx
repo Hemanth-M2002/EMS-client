@@ -132,9 +132,9 @@ export default function ViewEmployee() {
           <span className="text-lg font-bold">Employee Portal</span>
         </Link>
         <nav className="hidden md:flex gap-6">
-          <Link to="#" className="hover:underline">Dashboard</Link>
-          <Link to="#" className="hover:underline">Employees</Link>
-          <Link to="#" className="hover:underline">Settings</Link>
+        {localStorage.getItem("name")?<h1>Welcome <b>{localStorage.getItem("name")}</b></h1>:""}
+          {/* <Link to="#" className="hover:underline">Employees</Link> */}
+          <Link to="/sign-in" className="hover:underline" onClick={() => localStorage.removeItem("name")}>Logout</Link>
         </nav>
         <Button variant="ghost" size="icon" className="md:hidden">
           <MenuIcon className="w-6 h-6" />
@@ -148,14 +148,17 @@ export default function ViewEmployee() {
               Add New Employee
             </Button>
           </Link>
-          <h2 className="text-3xl font-semibold text-gray-700">Employee Lists</h2>
+          <span>
+            <h2 className="text-3xl font-semibold text-gray-700 ml-[-845px]">Employee Lists</h2>
+          </span>
         </div>
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
-          <p className="text-lg font-medium text-gray-600">Total Employees: {dataList.length}</p>
+        
+        <div className="flex flex-col md:flex-row justify-between items-end mb-8 space-y-4 md:space-y-0 gap-4">
+        <p className="text-lg font-medium text-gray-600w">Total Employees: {dataList.length}</p>
           <input
             type="text"
-            placeholder="Search by Name, Email, or Mobile..."
-            className="border border-gray-300 rounded-lg py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-800"
+            placeholder="Search by Name, Email"
+            className="border border-gray-300 rounded-lg py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-800 px-14 lg:mr-[-800px]"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -173,6 +176,7 @@ export default function ViewEmployee() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>S.No</TableHead>
               <TableHead>Profile</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
@@ -185,8 +189,9 @@ export default function ViewEmployee() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.map((employee) => (
+            {filteredData.map((employee,index) => (
               <TableRow key={employee._id}>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   <Avatar>
                     <AvatarImage src={employee.image || '/placeholder-user.jpg'} alt={employee.name} />
